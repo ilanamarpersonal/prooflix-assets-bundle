@@ -1,0 +1,14 @@
+# Pipeline 2: prints "Hello World2". Called by pipeline1, and can also run on its own.
+name: Pipeline 2
+description: Prints Hello World2
+
+tasks:
+  # Python code from src/hello_jobs/hello_world2.py
+  - key: hello_world2
+    type: python
+    description: Print Hello World2
+    entrypoint: hello_jobs.hello_world2:run
+
+# Returned to the calling pipeline as the output of its pipeline task.
+outputs:
+  message: ${tasks.hello_world2.output.message}

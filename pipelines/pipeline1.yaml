@@ -1,0 +1,23 @@
+# Pipeline 1: prints "hello World1", then calls pipeline2.
+# The file name (without .yaml) is the pipeline id: "pipeline1".
+name: Pipeline 1
+description: Prints hello World1, then runs pipeline2
+
+tasks:
+  # Task 1: Python code from src/hello_jobs/hello_world1.py
+  - key: hello_world1
+    type: python
+    description: Print hello World1
+    entrypoint: hello_jobs.hello_world1:run
+
+  # Task 2: call pipeline2 as a sub-pipeline.
+  # depends_on sets the order: it starts only after hello_world1 succeeded.
+  - key: run_pipeline2
+    type: pipeline
+    description: Call pipeline2
+    pipeline: pipeline2
+    depends_on: [hello_world1]
+
+outputs:
+  message1: ${tasks.hello_world1.output.message}
+  message2: ${tasks.run_pipeline2.output.message}
