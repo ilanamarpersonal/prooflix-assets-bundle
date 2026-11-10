@@ -2,12 +2,25 @@
 
 Called by the `bronze` pipeline (entrypoint: bronze.ingest:run).
 
-- Reads every data file under `source_dir` whose modification time is newer than
-  the date stored in the checkpoint file (the checkpoint folder itself is skipped).
+- Reads every data file under `source_dir` that was **created** after the date in
+  the checkpoint file. Editing or touching a file does not change its creation
+  time, so a file already processed is not picked up again.
 - Writes each one to the same relative path under `destination_dir`, with a
   `.parquet` extension, so the destination mirrors the source folder tree.
 - After every file is written, stores the run's start time as the new checkpoint,
-  so the next run only picks up files added or changed after this one started.
+  so the next run only picks up files created after this one started.
+
+The checkpoint file is JSON, for example:
+
+    {
+      "last_checkpoint": "2026-11-10T17:55:36.850493+00:00",
+      "previous_checkpoint": "1970-01-01T00:00:00+00:00",
+      "run_id": "0cf08a6bf038",
+      "files": 3,
+      "rows": 15856
+    }
+
+Only `last_checkpoint` is read back; the other fields describe the run that wrote it.
 """
 
 from __future__ import annotations
@@ -27,18 +40,42 @@ DEFAULT_CHECKPOINT = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
 
 # ------------------------------------------------------------------ checkpoint
-def read_checkpoint(path: Path) -> datetime:
-    if not path.is_file() or not path.read_text().strip():
-        return DEFAULT_CHECKPOINT
-    value = datetime.fromisoformat(path.read_text().strip())
+CHECKPOINT_KEY = "last_checkpoint"
+
+
+def _parse_time(text: str) -> datetime:
+    value = datetime.fromisoformat(text.strip())
     return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
 
 
-def write_checkpoint(path: Path, value: datetime) -> None:
+def read_checkpoint(path: Path) -> datetime:
+    """The `last_checkpoint` date in the JSON checkpoint file. A missing or empty
+    file means "from the beginning". A file holding just a date (the format
+    before JSON) is still accepted; the next run rewrites it as JSON."""
+    text = path.read_text().strip() if path.is_file() else ""
+    if not text:
+        return DEFAULT_CHECKPOINT
+    if not text.startswith("{"):
+        return _parse_time(text)
+    data = json.loads(text)
+    if not isinstance(data.get(CHECKPOINT_KEY), str):
+        raise ValueError(f"{path}: expected a JSON object with a {CHECKPOINT_KEY!r} date")
+    return _parse_time(data[CHECKPOINT_KEY])
+
+
+def write_checkpoint(path: Path, value: datetime, **details: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    data = {CHECKPOINT_KEY: value.isoformat(timespec="microseconds"), **details}
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(value.isoformat(timespec="microseconds") + "\n")
+    tmp.write_text(json.dumps(data, indent=2) + "\n")
     tmp.replace(path)  # atomic: a crash never leaves a half-written checkpoint
+
+
+def created_at(path: Path) -> datetime:
+    """When the file was created (st_birthtime on macOS and Windows). Linux file
+    systems don't expose it through os.stat, so there the modification time is used."""
+    st = path.stat()
+    return datetime.fromtimestamp(getattr(st, "st_birthtime", st.st_mtime), timezone.utc)
 
 
 # ------------------------------------------------------------------ readers
@@ -118,7 +155,7 @@ def run(source_dir: str, destination_dir: str, checkpoint_file: str, ctx=None) -
 
     started = datetime.now(timezone.utc)  # becomes the next checkpoint
     since = read_checkpoint(checkpoint)
-    log(f"checkpoint: {since.isoformat()}")
+    log(f"checkpoint: {since.isoformat()} (files created after it are new)")
 
     new_files = sorted(
         p
@@ -127,7 +164,7 @@ def run(source_dir: str, destination_dir: str, checkpoint_file: str, ctx=None) -
         and p.suffix.lower() in SUPPORTED
         and not p.is_relative_to(checkpoint_dir)
         and not any(part.startswith(".") for part in p.relative_to(source).parts)
-        and datetime.fromtimestamp(p.stat().st_mtime, timezone.utc) > since
+        and created_at(p) > since
     )
     log(f"{len(new_files)} new file(s) under {source_dir}")
 
@@ -143,7 +180,14 @@ def run(source_dir: str, destination_dir: str, checkpoint_file: str, ctx=None) -
         written.append({"source": rel.as_posix(), "parquet": out.relative_to(destination).as_posix(), "rows": table.num_rows})
         log(f"{rel.as_posix()} -> {destination_dir}/{written[-1]['parquet']} ({table.num_rows} rows)")
 
-    write_checkpoint(checkpoint, started)
+    write_checkpoint(
+        checkpoint,
+        started,
+        previous_checkpoint=since.isoformat(),
+        run_id=ctx.run_id if ctx is not None else None,
+        files=len(written),
+        rows=total_rows,
+    )
     log(f"new checkpoint: {started.isoformat()}")
     return {
         "previous_checkpoint": since.isoformat(),

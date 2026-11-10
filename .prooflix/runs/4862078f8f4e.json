@@ -1,0 +1,71 @@
+{
+  "id": "4862078f8f4e",
+  "pipeline": "bronze",
+  "pipeline_name": "Bronze",
+  "status": "SUCCEEDED",
+  "parameters": {
+    "source_dir": "data/tenant1/source",
+    "destination_dir": "data/tenant1",
+    "checkpoint_file": "data/tenant1/checkpoint/last_checkpoint.txt"
+  },
+  "outputs": {
+    "checkpoint": "2026-11-10T18:07:25.407940+00:00",
+    "files": 3,
+    "rows": 15856
+  },
+  "error": null,
+  "created_at": "2026-11-10T18:07:25.367212Z",
+  "started_at": "2026-11-10T18:07:25.368291Z",
+  "ended_at": "2026-11-10T18:07:25.477369Z",
+  "parent_run_id": "a67867658b90",
+  "parent_task_key": "run_bronze",
+  "root_run_id": "a67867658b90",
+  "depth": 1,
+  "tasks": {
+    "ingest": {
+      "key": "ingest",
+      "type": "python",
+      "depends_on": [],
+      "pipeline": null,
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T18:07:25.369093Z",
+      "ended_at": "2026-11-10T18:07:25.477114Z",
+      "output": {
+        "previous_checkpoint": "1970-01-01T00:00:00+00:00",
+        "checkpoint": "2026-11-10T18:07:25.407940+00:00",
+        "files": 3,
+        "rows": 15856,
+        "written": [
+          {
+            "source": "accounts/accounts.avro",
+            "parquet": "accounts/accounts.parquet",
+            "rows": 156
+          },
+          {
+            "source": "customers/customers.avro",
+            "parquet": "customers/customers.parquet",
+            "rows": 100
+          },
+          {
+            "source": "transactions/transactions.avro",
+            "parquet": "transactions/transactions.parquet",
+            "rows": 15600
+          }
+        ]
+      },
+      "error": null,
+      "logs": [
+        "18:07:25 Calling bronze.ingest:run",
+        "18:07:25 checkpoint: 1970-01-01T00:00:00+00:00 (files created after it are new)",
+        "18:07:25 3 new file(s) under data/tenant1/source",
+        "18:07:25 accounts/accounts.avro -> data/tenant1/accounts/accounts.parquet (156 rows)",
+        "18:07:25 customers/customers.avro -> data/tenant1/customers/customers.parquet (100 rows)",
+        "18:07:25 transactions/transactions.avro -> data/tenant1/transactions/transactions.parquet (15600 rows)",
+        "18:07:25 new checkpoint: 2026-11-10T18:07:25.407940+00:00"
+      ],
+      "child_run_id": null
+    }
+  }
+}

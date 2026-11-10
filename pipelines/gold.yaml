@@ -1,0 +1,27 @@
+# Gold: business aggregates built from the bronze tables.
+# The file name (without .yaml) is the pipeline id: "gold".
+name: Gold
+description: Counts transactions per day from tenant1.bronze.transactions into tenant1.gold.agg_transactions_per_date
+
+# Layout (catalog tenant1):
+#   data/tenant1/bronze/transactions/*.parquet                         read  -> tenant1.bronze.transactions
+#   data/tenant1/gold/agg_transactions_per_date/*.parquet              write -> tenant1.gold.agg_transactions_per_date
+parameters:
+  bronze_transactions_dir: data/tenant1/bronze/transactions  # the bronze table folder (all its Parquet files)
+  gold_dir: data/tenant1/gold                                # schema tenant1.gold
+
+tasks:
+  # Python code from src/gold/aggregate.py
+  - key: agg_transactions_per_date
+    type: python
+    description: Count transactions per day (rebuilds the whole table)
+    entrypoint: gold.aggregate:transactions_per_date
+    parameters:
+      bronze_transactions_dir: ${params.bronze_transactions_dir}
+      gold_dir: ${params.gold_dir}
+
+outputs:
+  days: ${tasks.agg_transactions_per_date.output.days}
+  transactions: ${tasks.agg_transactions_per_date.output.transactions}
+  first_date: ${tasks.agg_transactions_per_date.output.first_date}
+  last_date: ${tasks.agg_transactions_per_date.output.last_date}

@@ -1,8 +1,7 @@
-# E2E: end-to-end run of the data flow. For now it triggers the bronze pipeline;
-# add later layers (silver, gold) as further tasks that depend on run_bronze.
+# E2E: end-to-end run of the data flow: bronze, then gold.
 # The file name (without .yaml) is the pipeline id: "e2e".
 name: E2E
-description: End-to-end run, triggers the bronze pipeline
+description: End-to-end run, runs the bronze pipeline and then the gold pipeline
 
 tasks:
   # Call bronze as a sub-pipeline (it uses its own default parameters).
@@ -11,7 +10,17 @@ tasks:
     description: Run the bronze pipeline
     pipeline: bronze
 
+  # Then gold, which aggregates the bronze tables. depends_on makes it start only
+  # after run_bronze succeeded; if bronze fails, gold is skipped.
+  - key: run_gold
+    type: pipeline
+    description: Run the gold pipeline
+    pipeline: gold
+    depends_on: [run_bronze]
+
 outputs:
   bronze_checkpoint: ${tasks.run_bronze.output.checkpoint}
   bronze_files: ${tasks.run_bronze.output.files}
   bronze_rows: ${tasks.run_bronze.output.rows}
+  gold_days: ${tasks.run_gold.output.days}
+  gold_transactions: ${tasks.run_gold.output.transactions}
