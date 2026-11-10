@@ -1,0 +1,52 @@
+{
+  "id": "70f78778c568",
+  "pipeline": "gold",
+  "pipeline_name": "Gold",
+  "status": "SUCCEEDED",
+  "parameters": {
+    "bronze_transactions_dir": "data/tenant1/bronze/transactions",
+    "gold_dir": "data/tenant1/gold"
+  },
+  "outputs": {
+    "days": 1400,
+    "transactions": 104217764,
+    "first_date": "2023-01-01",
+    "last_date": "2026-10-31"
+  },
+  "error": null,
+  "created_at": "2026-11-10T19:12:33.080429Z",
+  "started_at": "2026-11-10T19:12:33.080818Z",
+  "ended_at": "2026-11-10T19:12:33.704660Z",
+  "parent_run_id": "178a972033c0",
+  "parent_task_key": "run_gold",
+  "root_run_id": "178a972033c0",
+  "depth": 1,
+  "tasks": {
+    "agg_transactions_per_date": {
+      "key": "agg_transactions_per_date",
+      "type": "python",
+      "depends_on": [],
+      "pipeline": null,
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T19:12:33.081229Z",
+      "ended_at": "2026-11-10T19:12:33.704388Z",
+      "output": {
+        "table": "agg_transactions_per_date",
+        "days": 1400,
+        "transactions": 104217764,
+        "first_date": "2023-01-01",
+        "last_date": "2026-10-31",
+        "path": "data/tenant1/gold/agg_transactions_per_date/agg_transactions_per_date.parquet"
+      },
+      "error": null,
+      "logs": [
+        "19:12:33 Calling gold.aggregate:transactions_per_date",
+        "19:12:33 read 104217764 transactions from data/tenant1/bronze/transactions",
+        "19:12:33 wrote 1400 days (2023-01-01 to 2026-10-31) to data/tenant1/gold/agg_transactions_per_date/"
+      ],
+      "child_run_id": null
+    }
+  }
+}

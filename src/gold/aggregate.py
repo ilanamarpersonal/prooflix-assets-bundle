@@ -22,12 +22,15 @@ import pyarrow.parquet as pq
 TABLE = "agg_transactions_per_date"
 
 
-def _read_table_folder(folder: Path) -> pa.Table:
-    """All Parquet files of a table folder, read as one table (like the Catalog does)."""
-    files = sorted(p for p in folder.rglob("*.parquet") if not any(x.startswith((".", "_")) for x in p.parts))
+def _read_table_folder(folder: Path, columns: list[str] | None = None) -> pa.Table:
+    """All Parquet files of a table folder, read as one table (like the Catalog does).
+    Reading only the columns needed keeps memory small for large tables."""
+    files = sorted(
+        p for p in folder.rglob("*.parquet") if not any(x.startswith((".", "_")) for x in p.relative_to(folder).parts)
+    )
     if not files:
         raise FileNotFoundError(f"no Parquet files in {folder}; run the bronze pipeline first")
-    return pa.concat_tables([pq.read_table(f) for f in files], promote_options="default")
+    return pa.concat_tables([pq.read_table(f, columns=columns) for f in files], promote_options="default")
 
 
 def transactions_per_date(
@@ -41,7 +44,7 @@ def transactions_per_date(
     source = (root / bronze_transactions_dir).resolve()
     out_dir = (root / gold_dir / TABLE).resolve()
 
-    transactions = _read_table_folder(source)
+    transactions = _read_table_folder(source, columns=[timestamp_column])
     log(f"read {transactions.num_rows} transactions from {bronze_transactions_dir}")
 
     ts = transactions[timestamp_column]

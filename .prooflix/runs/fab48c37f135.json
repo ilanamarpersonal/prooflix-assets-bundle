@@ -1,0 +1,104 @@
+{
+  "id": "fab48c37f135",
+  "pipeline": "bronze",
+  "pipeline_name": "Bronze",
+  "status": "SUCCEEDED",
+  "parameters": {
+    "source_dir": "data/tenant1/source",
+    "destination_dir": "data/tenant1/bronze",
+    "checkpoint_file": "data/tenant1/checkpoint/last_checkpoint.txt"
+  },
+  "outputs": {
+    "checkpoint": "2026-11-10T19:11:54.189531+00:00",
+    "files": 3,
+    "rows": 142009164
+  },
+  "error": null,
+  "created_at": "2026-11-10T19:11:54.150537Z",
+  "started_at": "2026-11-10T19:11:54.151479Z",
+  "ended_at": "2026-11-10T19:12:33.077546Z",
+  "parent_run_id": "178a972033c0",
+  "parent_task_key": "run_bronze",
+  "root_run_id": "178a972033c0",
+  "depth": 1,
+  "tasks": {
+    "ingest": {
+      "key": "ingest",
+      "type": "python",
+      "depends_on": [],
+      "pipeline": null,
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T19:11:54.152404Z",
+      "ended_at": "2026-11-10T19:12:33.077148Z",
+      "output": {
+        "previous_checkpoint": "1970-01-01T00:00:00+00:00",
+        "checkpoint": "2026-11-10T19:11:54.189531+00:00",
+        "files": 3,
+        "rows": 142009164,
+        "written": [
+          {
+            "source": "accounts/accounts.avro",
+            "parquet": "accounts/accounts-*.parquet (62 parts)",
+            "rows": 24660731
+          },
+          {
+            "source": "customers/customers.avro",
+            "parquet": "customers/customers-*.parquet (27 parts)",
+            "rows": 13130669
+          },
+          {
+            "source": "transactions/transactions.avro",
+            "parquet": "transactions/transactions-*.parquet (123 parts)",
+            "rows": 104217764
+          }
+        ]
+      },
+      "error": null,
+      "logs": [
+        "19:11:54 Calling bronze.ingest:run",
+        "19:11:54 checkpoint: 1970-01-01T00:00:00+00:00 (files created after it are new)",
+        "19:11:54 3 new file(s) under data/tenant1/source",
+        "19:11:54   accounts.avro: 62 blocks, 24,660,731 rows, converting with 8 worker processes",
+        "19:11:55   accounts.avro: 11% (2,800,000 rows, 1s)",
+        "19:11:55   accounts.avro: 21% (5,200,000 rows, 2s)",
+        "19:11:56   accounts.avro: 31% (7,600,000 rows, 2s)",
+        "19:11:57   accounts.avro: 41% (10,000,000 rows, 3s)",
+        "19:11:57   accounts.avro: 50% (12,400,000 rows, 3s)",
+        "19:11:58   accounts.avro: 60% (14,800,000 rows, 4s)",
+        "19:11:58   accounts.avro: 71% (17,600,000 rows, 5s)",
+        "19:11:59   accounts.avro: 81% (20,000,000 rows, 6s)",
+        "19:11:59   accounts.avro: 91% (22,400,000 rows, 6s)",
+        "19:12:00   accounts.avro: 100% (24,660,731 rows, 6s)",
+        "19:12:00 accounts/accounts.avro -> data/tenant1/bronze/accounts/accounts-*.parquet (62 parts) (24,660,731 rows)",
+        "19:12:00   customers.avro: 27 blocks, 13,130,669 rows, converting with 8 worker processes",
+        "19:12:02   customers.avro: 11% (1,451,361 rows, 2s)",
+        "19:12:02   customers.avro: 23% (3,051,126 rows, 2s)",
+        "19:12:03   customers.avro: 35% (4,630,994 rows, 2s)",
+        "19:12:03   customers.avro: 41% (5,420,637 rows, 3s)",
+        "19:12:03   customers.avro: 50% (6,630,901 rows, 3s)",
+        "19:12:04   customers.avro: 61% (8,069,940 rows, 4s)",
+        "19:12:04   customers.avro: 70% (9,209,882 rows, 4s)",
+        "19:12:05   customers.avro: 82% (10,789,307 rows, 5s)",
+        "19:12:05   customers.avro: 94% (12,350,249 rows, 5s)",
+        "19:12:06   customers.avro: 100% (13,130,669 rows, 6s)",
+        "19:12:06 customers/customers.avro -> data/tenant1/bronze/customers/customers-*.parquet (27 parts) (13,130,669 rows)",
+        "19:12:06   transactions.avro: 123 blocks, 104,217,764 rows, converting with 8 worker processes",
+        "19:12:09   transactions.avro: 10% (10,585,744 rows, 3s)",
+        "19:12:12   transactions.avro: 20% (21,167,160 rows, 6s)",
+        "19:12:14   transactions.avro: 30% (31,305,835 rows, 8s)",
+        "19:12:17   transactions.avro: 40% (41,884,516 rows, 11s)",
+        "19:12:20   transactions.avro: 51% (53,280,108 rows, 14s)",
+        "19:12:22   transactions.avro: 61% (63,423,554 rows, 17s)",
+        "19:12:25   transactions.avro: 71% (73,565,840 rows, 19s)",
+        "19:12:27   transactions.avro: 80% (83,713,580 rows, 22s)",
+        "19:12:30   transactions.avro: 90% (93,855,906 rows, 24s)",
+        "19:12:33   transactions.avro: 100% (104,217,764 rows, 27s)",
+        "19:12:33 transactions/transactions.avro -> data/tenant1/bronze/transactions/transactions-*.parquet (123 parts) (104,217,764 rows)",
+        "19:12:33 new checkpoint: 2026-11-10T19:11:54.189531+00:00"
+      ],
+      "child_run_id": null
+    }
+  }
+}

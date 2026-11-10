@@ -1,0 +1,71 @@
+{
+  "id": "cdb2310392ad",
+  "pipeline": "e2e",
+  "pipeline_name": "E2E",
+  "status": "SUCCEEDED",
+  "parameters": {},
+  "outputs": {
+    "bronze_checkpoint": "2026-11-10T18:34:20.231106+00:00",
+    "bronze_files": 3,
+    "bronze_rows": 15856,
+    "gold_days": 1251,
+    "gold_transactions": 15600
+  },
+  "error": null,
+  "created_at": "2026-11-10T18:34:20.186594Z",
+  "started_at": "2026-11-10T18:34:20.188670Z",
+  "ended_at": "2026-11-10T18:34:20.326105Z",
+  "parent_run_id": null,
+  "parent_task_key": null,
+  "root_run_id": "cdb2310392ad",
+  "depth": 0,
+  "tasks": {
+    "run_bronze": {
+      "key": "run_bronze",
+      "type": "pipeline",
+      "depends_on": [],
+      "pipeline": "bronze",
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T18:34:20.190024Z",
+      "ended_at": "2026-11-10T18:34:20.301588Z",
+      "output": {
+        "checkpoint": "2026-11-10T18:34:20.231106+00:00",
+        "files": 3,
+        "rows": 15856
+      },
+      "error": null,
+      "logs": [
+        "18:34:20 Started sub-pipeline 'bronze' as run 6331d10c55a3",
+        "18:34:20 Sub-pipeline run 6331d10c55a3 succeeded"
+      ],
+      "child_run_id": "6331d10c55a3"
+    },
+    "run_gold": {
+      "key": "run_gold",
+      "type": "pipeline",
+      "depends_on": [
+        "run_bronze"
+      ],
+      "pipeline": "gold",
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T18:34:20.301914Z",
+      "ended_at": "2026-11-10T18:34:20.325926Z",
+      "output": {
+        "days": 1251,
+        "transactions": 15600,
+        "first_date": "2023-03-03",
+        "last_date": "2026-10-31"
+      },
+      "error": null,
+      "logs": [
+        "18:34:20 Started sub-pipeline 'gold' as run 109ad609e607",
+        "18:34:20 Sub-pipeline run 109ad609e607 succeeded"
+      ],
+      "child_run_id": "109ad609e607"
+    }
+  }
+}

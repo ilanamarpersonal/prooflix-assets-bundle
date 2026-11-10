@@ -1,0 +1,54 @@
+{
+  "id": "858ea217783f",
+  "pipeline": "bronze",
+  "pipeline_name": "Bronze",
+  "status": "SUCCEEDED",
+  "parameters": {
+    "source_dir": "data/tenant1/source",
+    "destination_dir": "data/tenant1/bronze",
+    "checkpoint_file": "data/tenant1/checkpoint/last_checkpoint.txt"
+  },
+  "outputs": {
+    "checkpoint": "2026-11-10T19:45:16.702758+00:00",
+    "files": 0,
+    "rows": 0
+  },
+  "error": null,
+  "created_at": "2026-11-10T19:45:16.691580Z",
+  "started_at": "2026-11-10T19:45:16.692552Z",
+  "ended_at": "2026-11-10T19:45:16.704734Z",
+  "parent_run_id": "e8d9374751d8",
+  "parent_task_key": "run_bronze",
+  "root_run_id": "e8d9374751d8",
+  "depth": 1,
+  "tasks": {
+    "ingest": {
+      "key": "ingest",
+      "type": "python",
+      "depends_on": [],
+      "pipeline": null,
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T19:45:16.693298Z",
+      "ended_at": "2026-11-10T19:45:16.704447Z",
+      "output": {
+        "previous_checkpoint": "2026-11-10T19:11:54.189531+00:00",
+        "checkpoint": "2026-11-10T19:45:16.702758+00:00",
+        "files": 0,
+        "rows": 0,
+        "written": []
+      },
+      "error": null,
+      "logs": [
+        "19:45:16 Calling bronze.ingest:run",
+        "19:45:16 checkpoint: 2026-11-10T19:11:54.189531+00:00 (files created after it are new)",
+        "19:45:16 0 new file(s) under data/tenant1/source",
+        "19:45:16 new checkpoint: 2026-11-10T19:45:16.702758+00:00"
+      ],
+      "child_run_id": null
+    }
+  },
+  "trigger": "pipeline",
+  "scheduled_for": null
+}

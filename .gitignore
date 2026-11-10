@@ -1,3 +1,10 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# Data files: the source files and the Parquet tables bronze and gold write can be
+# gigabytes, far over GitHub's 100 MB file limit. They stay on disk, outside git.
+data/**/*.avro
+data/**/*.parquet
+data/**/checkpoint/
+.prooflix/trash/

@@ -14,6 +14,8 @@ src/                     Python code the pipelines call
     avro_reader.py       pure-Python Avro reader (the server has no Avro library)
   gold/
     aggregate.py         used by gold (entrypoint gold.aggregate:transactions_per_date)
+scripts/
+  generate_banking_data.py  writes large synthetic source files (see "Large test data")
 data/
   tenant1/                 one folder per tenant: the catalog "tenant1"
     source/                raw input files, any folder tree (.avro, .csv, .json, .parquet)
@@ -89,6 +91,12 @@ in it a schema (the layer), and a folder of Parquet files is one table. So
 `data/tenant1/bronze/customers/` is `tenant1.bronze.customers`. `source/` and
 `checkpoint/` hold no Parquet, so they add no tables.
 
+Large Avro files (64 MB and up, flat records) are converted block by block in up to 8
+worker processes, so memory holds a few blocks rather than the whole file. Each block
+becomes one Parquet part, so `transactions.avro` becomes
+`bronze/transactions/transactions-00000.parquet`, `-00001.parquet`, ...; the folder is
+still the one table `tenant1.bronze.transactions`.
+
 ## Gold
 
 `gold` reads every Parquet file of `tenant1.bronze.transactions`
@@ -106,6 +114,22 @@ The table is rebuilt from all of bronze on every run, so it always matches bronz
 ```sql
 SELECT * FROM tenant1.gold.agg_transactions_per_date ORDER BY transaction_date DESC;
 ```
+
+## Large test data
+
+`scripts/generate_banking_data.py` writes synthetic `customers`, `accounts` and
+`transactions` Avro files of a given size, with the same schemas as the samples and
+consistent data (every account has a customer, every transaction an account, running
+balances add up). It needs fastavro and numpy, so run it with uv:
+
+```bash
+uv run --no-project --with fastavro --with numpy python scripts/generate_banking_data.py \
+    --out data/tenant1/source --customers-gb 1 --accounts-gb 1 --transactions-gb 5
+```
+
+That makes about 13M customers, 25M accounts and 104M transactions (7.3 GB) in under a
+minute. Data files (`data/**/*.avro`, `data/**/*.parquet`, checkpoints) are in
+`.gitignore`: they stay on disk and out of git, since GitHub refuses files over 100 MB.
 
 ## Run it
 
