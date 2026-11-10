@@ -1,0 +1,59 @@
+{
+  "id": "a2e8ed9e66a2",
+  "pipeline": "bronze",
+  "pipeline_name": "Bronze",
+  "status": "SUCCEEDED",
+  "parameters": {
+    "source_dir": "data/tenant1/source",
+    "destination_dir": "data/tenant1/destination",
+    "checkpoint_file": "data/tenant1/source/checkpoint/last_checkpoint.txt"
+  },
+  "outputs": {
+    "checkpoint": "2026-11-10T17:43:45.747845+00:00",
+    "files": 1,
+    "rows": 156
+  },
+  "error": null,
+  "created_at": "2026-11-10T17:43:45.726092Z",
+  "started_at": "2026-11-10T17:43:45.726362Z",
+  "ended_at": "2026-11-10T17:43:45.750345Z",
+  "parent_run_id": "1c0be4a7ccae",
+  "parent_task_key": "run_bronze",
+  "root_run_id": "1c0be4a7ccae",
+  "depth": 1,
+  "tasks": {
+    "ingest": {
+      "key": "ingest",
+      "type": "python",
+      "depends_on": [],
+      "pipeline": null,
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T17:43:45.726661Z",
+      "ended_at": "2026-11-10T17:43:45.749768Z",
+      "output": {
+        "previous_checkpoint": "2026-11-10T17:43:45.634336+00:00",
+        "checkpoint": "2026-11-10T17:43:45.747845+00:00",
+        "files": 1,
+        "rows": 156,
+        "written": [
+          {
+            "source": "accounts/accounts.avro",
+            "parquet": "accounts/accounts.parquet",
+            "rows": 156
+          }
+        ]
+      },
+      "error": null,
+      "logs": [
+        "17:43:45 Calling bronze.ingest:run",
+        "17:43:45 checkpoint: 2026-11-10T17:43:45.634336+00:00",
+        "17:43:45 1 new file(s) under data/tenant1/source",
+        "17:43:45 accounts/accounts.avro -> data/tenant1/destination/accounts/accounts.parquet (156 rows)",
+        "17:43:45 new checkpoint: 2026-11-10T17:43:45.747845+00:00"
+      ],
+      "child_run_id": null
+    }
+  }
+}

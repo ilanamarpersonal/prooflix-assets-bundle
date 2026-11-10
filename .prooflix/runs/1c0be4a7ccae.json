@@ -1,0 +1,44 @@
+{
+  "id": "1c0be4a7ccae",
+  "pipeline": "e2e",
+  "pipeline_name": "E2E",
+  "status": "SUCCEEDED",
+  "parameters": {},
+  "outputs": {
+    "bronze_checkpoint": "2026-11-10T17:43:45.747845+00:00",
+    "bronze_files": 1,
+    "bronze_rows": 156
+  },
+  "error": null,
+  "created_at": "2026-11-10T17:43:45.722508Z",
+  "started_at": "2026-11-10T17:43:45.723019Z",
+  "ended_at": "2026-11-10T17:43:45.750686Z",
+  "parent_run_id": null,
+  "parent_task_key": null,
+  "root_run_id": "1c0be4a7ccae",
+  "depth": 0,
+  "tasks": {
+    "run_bronze": {
+      "key": "run_bronze",
+      "type": "pipeline",
+      "depends_on": [],
+      "pipeline": "bronze",
+      "status": "SUCCEEDED",
+      "attempt": 1,
+      "max_attempts": 1,
+      "started_at": "2026-11-10T17:43:45.725156Z",
+      "ended_at": "2026-11-10T17:43:45.750527Z",
+      "output": {
+        "checkpoint": "2026-11-10T17:43:45.747845+00:00",
+        "files": 1,
+        "rows": 156
+      },
+      "error": null,
+      "logs": [
+        "17:43:45 Started sub-pipeline 'bronze' as run a2e8ed9e66a2",
+        "17:43:45 Sub-pipeline run a2e8ed9e66a2 succeeded"
+      ],
+      "child_run_id": "a2e8ed9e66a2"
+    }
+  }
+}

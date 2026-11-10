@@ -12,10 +12,13 @@ src/                     Python code the pipelines call
     ingest.py            used by bronze (entrypoint bronze.ingest:run)
     avro_reader.py       pure-Python Avro reader (the server has no Avro library)
 data/
-  source/                raw input files, any folder tree (.avro, .csv, .json, .parquet)
+  tenant1/                 one folder per tenant; it is the catalog schema "tenant1"
+    source/                raw input files, any folder tree (.avro, .csv, .json, .parquet)
     checkpoint/
       last_checkpoint.txt  date of the last bronze run (ISO 8601)
-  destination/           written by bronze: same tree as source, files as .parquet
+    accounts/              written by bronze, next to source/: same tree as source,
+    customers/               files as .parquet (one folder per table)
+    transactions/
 ```
 
 ## How the pipelines fit together
@@ -40,20 +43,26 @@ The full format is in [prooflix-core/docs/pipelines.md](../prooflix-core/docs/pi
 
 ## Bronze and the checkpoint
 
-1. Reads the date in `data/source/checkpoint/last_checkpoint.txt` (a missing or
+1. Reads the date in `data/tenant1/checkpoint/last_checkpoint.txt` (a missing or
    empty file means "from the beginning").
-2. Picks every file under `data/source/` modified after that date, skipping the
-   `checkpoint/` folder and hidden files.
-3. Writes each one to the same relative path under `data/destination/` with a
-   `.parquet` extension, for example
-   `source/customers/customers.avro` -> `destination/customers/customers.parquet`.
+2. Picks every file under `data/tenant1/source/` modified after that date, skipping
+   hidden files.
+3. Writes each one to the same relative path directly under `data/tenant1/`, next to
+   `source/`, with a `.parquet` extension, for example
+   `source/customers/customers.avro` -> `customers/customers.parquet`.
 4. Saves the time the run started as the new checkpoint, so a file changed during
    the run is picked up by the next one.
 
 The folders and checkpoint file are parameters of `bronze` (`source_dir`,
-`destination_dir`, `checkpoint_file`). To reprocess everything, set the
+`destination_dir`, `checkpoint_file`); another tenant can run with its own
+folders by passing them. To reprocess everything, set the
 checkpoint back to `1970-01-01T00:00:00+00:00`. Avro files must use the `null` or
 `deflate` codec.
+
+The Catalog and SQL Editor read the Parquet output. Each folder in `data/` is a
+schema named after it (the tenant ID) and a folder of Parquet files is one table, so
+`data/tenant1/customers/` is the table `tenant1.customers`. `source/` and
+`checkpoint/` hold no Parquet, so they add no tables.
 
 ## Run it
 
