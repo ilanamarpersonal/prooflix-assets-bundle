@@ -1,0 +1,25 @@
+# Bronze: lands every source file that is newer than the last checkpoint as Parquet.
+# The file name (without .yaml) is the pipeline id: "bronze".
+name: Bronze
+description: Converts source files newer than the checkpoint to Parquet in data/destination
+
+parameters:
+  source_dir: data/source                                    # read from here (whole folder tree)
+  destination_dir: data/destination                          # same tree, files as .parquet
+  checkpoint_file: data/source/checkpoint/last_checkpoint.txt  # last checkpoint date (ISO 8601)
+
+tasks:
+  # Python code from src/bronze/ingest.py
+  - key: ingest
+    type: python
+    description: Convert new source files to Parquet and move the checkpoint
+    entrypoint: bronze.ingest:run
+    parameters:
+      source_dir: ${params.source_dir}
+      destination_dir: ${params.destination_dir}
+      checkpoint_file: ${params.checkpoint_file}
+
+outputs:
+  checkpoint: ${tasks.ingest.output.checkpoint}
+  files: ${tasks.ingest.output.files}
+  rows: ${tasks.ingest.output.rows}
