@@ -2,13 +2,10 @@ __pycache__/
 *.pyc
 .DS_Store
 
-# Data files: the source files and the Parquet tables bronze and gold write can be
-# gigabytes, far over GitHub's 100 MB file limit. They stay on disk, outside git.
-data/**/*.avro
-data/**/*.parquet
-data/**/checkpoint/
-# Delta tables (Parquet files, .crc checksums, _delta_log), written by the pipelines
-data/**/lakehouse/
+# The data lake: source files, Delta tables and streaming checkpoints. They can be
+# gigabytes, far over GitHub's 100 MB file limit, and the pipelines rebuild the
+# tables, so the whole folder stays on disk, outside git.
+/data/
 .prooflix/trash/
 
 # A workspace's data/ and source/ are links Prooflix makes to the data lake and the
