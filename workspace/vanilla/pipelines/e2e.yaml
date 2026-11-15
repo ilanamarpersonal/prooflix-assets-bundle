@@ -1,0 +1,33 @@
+# E2E: end-to-end run of the data flow: bronze, then silver, then gold.
+# The file name (without .yaml) is the pipeline id: "e2e".
+name: E2E
+description: End-to-end run, runs the bronze, silver and gold pipelines in that order
+
+tasks:
+  # Call bronze as a sub-pipeline (it uses its own default parameters).
+  - key: run_bronze
+    type: pipeline
+    description: Run the bronze pipeline
+    pipeline: bronze
+
+  # Then silver, which turns the long dates of the bronze tables into date-times.
+  # depends_on makes it start only after run_bronze succeeded; if bronze fails,
+  # silver and gold are skipped.
+  - key: run_silver
+    type: pipeline
+    description: Run the silver pipeline
+    pipeline: silver
+    depends_on: [run_bronze]
+
+  # Then gold, which aggregates the silver tables, once silver succeeded.
+  - key: run_gold
+    type: pipeline
+    description: Run the gold pipeline
+    pipeline: gold
+    depends_on: [run_silver]
+
+outputs:
+  bronze_rows: ${tasks.run_bronze.output.rows}
+  silver_rows: ${tasks.run_silver.output.rows}
+  gold_days: ${tasks.run_gold.output.days}
+  gold_transactions: ${tasks.run_gold.output.transactions}

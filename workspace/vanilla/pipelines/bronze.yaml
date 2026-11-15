@@ -1,0 +1,31 @@
+# Bronze: lands every new source file as rows of a Delta table, with Spark.
+# The file name (without .yaml) is the pipeline id: "bronze".
+name: Bronze
+description: Streams new source files into Delta tables tenant1.bronze.<table> (Spark Structured Streaming, Unity Catalog)
+
+# Layout:
+#   source/<table>/*.avro                        raw files (the workspace's source data
+#                                                folder, set in the Workspace tab)
+#   tenant1.bronze.<table>                       Delta table in Unity Catalog, files under
+#                                                data/tenant1/lakehouse/bronze/<table>
+#   data/tenant1/checkpoint/bronze/<table>/      Spark's streaming checkpoint: which files
+#                                                were read (delete it to read all again)
+parameters:
+  source_dir: source                              # one sub-folder per table
+  checkpoint_dir: data/tenant1/checkpoint/bronze  # one streaming checkpoint per table
+  file_format: avro
+
+tasks:
+  # Python code from src/bronze/ingest.py, run on Spark
+  - key: ingest
+    type: python
+    description: Stream new source files into the bronze Delta tables
+    entrypoint: bronze.ingest:run
+    parameters:
+      source_dir: ${params.source_dir}
+      checkpoint_dir: ${params.checkpoint_dir}
+      file_format: ${params.file_format}
+
+outputs:
+  tables: ${tasks.ingest.output.tables}
+  rows: ${tasks.ingest.output.rows}

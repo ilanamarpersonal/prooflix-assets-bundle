@@ -1,0 +1,8 @@
+# Spark settings for this workspace's tasks (see src/infra/config.py). Environment
+# variables (set by the Helm chart in Kubernetes) override these.
+master: local[*]
+driver_memory: 8g
+uc_uri: http://localhost:8080
+catalog: tenant1
+conf:
+  spark.sql.shuffle.partitions: "32"

@@ -1,0 +1,24 @@
+# Gold: business aggregates built from the silver tables, with Spark.
+# The file name (without .yaml) is the pipeline id: "gold".
+name: Gold
+description: Counts transactions per day from tenant1.silver.transactions into tenant1.gold.agg_transactions_per_date
+
+parameters:
+  source_table: silver.transactions   # in the tenant catalog
+  timestamp_column: transaction_ts
+
+tasks:
+  # Python code from src/gold/aggregate.py, run on Spark
+  - key: agg_transactions_per_date
+    type: python
+    description: Count transactions per day (rebuilds the whole table)
+    entrypoint: gold.aggregate:transactions_per_date
+    parameters:
+      source_table: ${params.source_table}
+      timestamp_column: ${params.timestamp_column}
+
+outputs:
+  days: ${tasks.agg_transactions_per_date.output.days}
+  transactions: ${tasks.agg_transactions_per_date.output.transactions}
+  first_date: ${tasks.agg_transactions_per_date.output.first_date}
+  last_date: ${tasks.agg_transactions_per_date.output.last_date}

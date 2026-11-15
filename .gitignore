@@ -7,4 +7,13 @@ __pycache__/
 data/**/*.avro
 data/**/*.parquet
 data/**/checkpoint/
+# Delta tables (Parquet files, .crc checksums, _delta_log), written by the pipelines
+data/**/lakehouse/
 .prooflix/trash/
+
+# A workspace's data/ and source/ are links Prooflix makes to the data lake and the
+# source data folder (paths on this machine), so they stay out of git.
+workspace/*/data
+workspace/*/source
+# Prooflix's local state for the workspace: run history and folder settings
+workspace/*/.prooflix/

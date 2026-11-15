@@ -1,0 +1,9 @@
+type,direction,description
+deposit,credit,Cash or check deposit
+transfer_in,credit,Transfer from another account
+salary,credit,Salary payment
+withdrawal,debit,Cash withdrawal
+transfer_out,debit,Transfer to another account
+card_payment,debit,Card payment at a merchant
+interest,credit,Interest paid by the bank
+fee,debit,Fee charged by the bank

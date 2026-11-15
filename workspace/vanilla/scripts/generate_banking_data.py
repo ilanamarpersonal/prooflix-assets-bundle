@@ -1,6 +1,7 @@
 """Generate large synthetic banking source files (customers, accounts, transactions).
 
-Writes Avro object container files with the same schemas as the bundled samples:
+Writes Avro object container files with the same schemas as the bundled samples, except
+that dates and timestamps are plain longs (milliseconds since 1970-01-01 UTC):
 
     <out>/customers/customers.avro
     <out>/accounts/accounts.avro
@@ -42,8 +43,10 @@ GB = 1024**3
 SYNC = b"prooflix-bankgen"  # 16 bytes, shared by every chunk so they can be joined
 assert len(SYNC) == 16
 
-DATE = {"type": "int", "logicalType": "date"}
-TS = {"type": "long", "logicalType": "timestamp-millis"}
+# dates and timestamps are plain longs: milliseconds since 1970-01-01 UTC (a date at 00:00)
+DATE = "long"
+TS = "long"
+DAY_MS = 86_400_000
 SCHEMAS = {
     "customers": {
         "type": "record",
@@ -150,8 +153,8 @@ def customers(start: int, n: int, seed: int) -> list[dict]:
             "phone": f"+000-{ph // 10000:03d}-{ph % 10000:04d}",
             "country": PLACES[p][0],
             "city": PLACES[p][1],
-            "date_of_birth": d,
-            "joined_date": j,
+            "date_of_birth": d * DAY_MS,
+            "joined_date": j * DAY_MS,
             "segment": "premium" if pr else "retail",
         })
     return out
@@ -207,7 +210,7 @@ def accounts_and_transactions(
             "customer_id": c,
             "account_type": ACCOUNT_KINDS[k][0],
             "currency": ACCOUNT_KINDS[k][1],
-            "opened_date": o,
+            "opened_date": o * DAY_MS,
             "status": "active",
             "opening_balance": ob,
             "balance": b,

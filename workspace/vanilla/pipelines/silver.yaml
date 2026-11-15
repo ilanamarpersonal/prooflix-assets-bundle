@@ -1,0 +1,32 @@
+# Silver: the bronze tables with their dates as date-times, plus dimension tables.
+# The file name (without .yaml) is the pipeline id: "silver".
+name: Silver
+description: Streams new bronze rows into tenant1.silver with long dates as date-times, and loads the CSV dimension seeds
+
+# Layout:
+#   tenant1.bronze.<table>                        read (new rows only)
+#   tenant1.silver.<table>                        written: date columns as timestamps (UTC)
+#   tenant1.silver.dim_<seed>                     written from seeds/<seed>.csv
+#   data/tenant1/checkpoint/silver/<table>/       Spark's streaming checkpoint
+parameters:
+  tables: [customers, accounts, transactions]
+  datetime_columns: [date_of_birth, joined_date, opened_date, transaction_ts]  # long ms -> timestamp (UTC)
+  checkpoint_dir: data/tenant1/checkpoint/silver
+  seeds_dir: seeds
+
+tasks:
+  # Python code from src/silver/conform.py, run on Spark
+  - key: conform
+    type: python
+    description: Convert long dates to date-times, bronze -> silver; load the seeds
+    entrypoint: silver.conform:run
+    parameters:
+      tables: ${params.tables}
+      datetime_columns: ${params.datetime_columns}
+      checkpoint_dir: ${params.checkpoint_dir}
+      seeds_dir: ${params.seeds_dir}
+
+outputs:
+  tables: ${tasks.conform.output.tables}
+  rows: ${tasks.conform.output.rows}
+  dimensions: ${tasks.conform.output.dimensions}
