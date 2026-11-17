@@ -63,6 +63,10 @@ def get_spark(ctx=None):
             .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
             .config("spark.sql.defaultCatalog", s.catalog)
             .config("spark.sql.session.timeZone", "UTC")
+            # JDBC hands times over as java.sql.Timestamp in the JVM's zone: UTC keeps
+            # a database's wall-clock times unchanged
+            .config("spark.driver.extraJavaOptions", "-Duser.timezone=UTC")
+            .config("spark.executor.extraJavaOptions", "-Duser.timezone=UTC")
             .config("spark.sql.streaming.schemaInference", "true")
             .config("spark.ui.showConsoleProgress", "false")
         )

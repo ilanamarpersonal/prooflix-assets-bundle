@@ -7,7 +7,7 @@ sets those in the pod):
     setting          spark.yaml key    environment variable         default
     master           master            PROOFLIX_SPARK_MASTER        local[*]
     driver memory    driver_memory     PROOFLIX_SPARK_DRIVER_MEMORY 4g
-    packages         packages          PROOFLIX_SPARK_PACKAGES      Delta, Unity Catalog, Avro (below)
+    packages         packages          PROOFLIX_SPARK_PACKAGES      Delta, Unity Catalog, Avro, JDBC drivers (below)
     package cache    ivy_dir           PROOFLIX_SPARK_IVY           Spark's default (~/.ivy2)
     Java             java_home         JAVA_HOME                    Homebrew's openjdk@17 when present
     Unity Catalog    uc_uri            PROOFLIX_UC_URI              http://localhost:8080
@@ -34,6 +34,11 @@ PACKAGES = (
     "io.delta:delta-spark_4.0_2.13:4.3.1",
     "io.unitycatalog:unitycatalog-spark_4.0_2.13:0.7.0",
     f"org.apache.spark:spark-avro_2.13:{SPARK_VERSION}",
+    # JDBC drivers for ingesting relational databases (bronze/jdbc_ingest.py)
+    "com.oracle.database.jdbc:ojdbc11:23.5.0.24.07",
+    "com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11",
+    "com.mysql:mysql-connector-j:9.1.0",
+    "org.postgresql:postgresql:42.7.4",
 )
 HOMEBREW_JAVA = Path("/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home")
 CONF_FILE = Path("conf") / "spark.yaml"

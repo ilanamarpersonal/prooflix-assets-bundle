@@ -1,0 +1,20 @@
+# Managed by the Ingestion tab: copies tables of a relational database into bronze.
+# Configure it there: saving the job rewrites this file.
+name: transaction_test
+description: Copies 1 table of the banktest database into bronze (Ingestion tab).
+parameters: {from_date: null, to_date: null}
+tasks:
+- key: ingest
+  type: python
+  entrypoint: bronze.jdbc_ingest:run
+  parameters:
+    connection: banktest
+    start_date: null
+    tables:
+    - source: bank.transactions
+      target: banktest_transactions
+      columns: []
+      watermark: transaction_ts
+      keys: [transaction_id]
+    from_date: ${params.from_date}
+    to_date: ${params.to_date}
