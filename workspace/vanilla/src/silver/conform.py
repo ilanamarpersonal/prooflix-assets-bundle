@@ -21,6 +21,7 @@ from infra.materialization import table_exists
 from infra.streaming import run_once, table_stream
 from infra.transformations import to_datetimes
 from runtime.catalog import tenant_catalog
+from runtime.paths import workspace_path
 from runtime.spark_session import get_spark
 
 SOURCE, TARGET = "bronze", "silver"
@@ -32,7 +33,7 @@ def run(tables: list[str], datetime_columns: list[str], checkpoint_dir: str, see
     log = ctx.log if ctx is not None else print
     spark = get_spark(ctx)
     catalog = tenant_catalog(ctx, schemas=(TARGET,))
-    checkpoints = (root / checkpoint_dir).resolve()
+    checkpoints = workspace_path(root, checkpoint_dir)
 
     out = {}
     for table in tables:
@@ -44,5 +45,5 @@ def run(tables: list[str], datetime_columns: list[str], checkpoint_dir: str, see
         out[table] = result["rows"]
         log(f"{source.name} -> {target.name}: {result['rows']:,} new rows")
 
-    seeds = load_seeds(spark, (root / seeds_dir).resolve(), catalog, TARGET, log)
+    seeds = load_seeds(spark, workspace_path(root, seeds_dir), catalog, TARGET, log)
     return {"tables": out, "rows": sum(out.values()), "dimensions": seeds}

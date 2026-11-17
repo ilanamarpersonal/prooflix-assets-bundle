@@ -53,9 +53,16 @@ def select_sql(kind: str, source: str, columns: list[str], where: str | None = N
     return f"SELECT {cols} FROM {table_name(kind, source)}" + (f" WHERE {where}" if where else "")
 
 
+# driver settings that must stay off whatever the connection says: a database could
+# otherwise ask for a local file of the server (LOAD DATA LOCAL) or send Java objects
+SAFE_OPTIONS = {
+    "mysql": {"allowLoadLocalInfile": "false", "allowUrlInLocalInfile": "false", "autoDeserialize": "false"},
+}
+
+
 def read(spark, conn: dict, sql: str, fetch_size: int = FETCH_SIZE):
     """The rows of a SELECT, as a DataFrame (read when an action runs)."""
-    return (
+    reader = (
         spark.read.format("jdbc")
         .option("url", conn["jdbc_url"])
         .option("driver", conn["driver"])
@@ -63,5 +70,7 @@ def read(spark, conn: dict, sql: str, fetch_size: int = FETCH_SIZE):
         .option("password", conn["password"])
         .option("query", sql)
         .option("fetchsize", fetch_size)
-        .load()
     )
+    for key, value in SAFE_OPTIONS.get(conn["kind"], {}).items():
+        reader = reader.option(key, value)
+    return reader.load()

@@ -21,6 +21,7 @@ from pathlib import Path
 from infra.streaming import file_stream, run_once
 from infra.transformations import with_ingest_metadata
 from runtime.catalog import tenant_catalog
+from runtime.paths import workspace_path
 from runtime.spark_session import get_spark
 
 SCHEMA = "bronze"
@@ -29,10 +30,10 @@ SCHEMA = "bronze"
 def run(source_dir: str, checkpoint_dir: str, file_format: str = "avro", ctx=None) -> dict:
     root = ctx.workspace if ctx is not None else Path.cwd()
     log = ctx.log if ctx is not None else print
-    source = (root / source_dir).resolve()
+    source = workspace_path(root, source_dir)
     if not source.is_dir():
         raise FileNotFoundError(f"source folder {source_dir} not found ({source})")
-    checkpoints = (root / checkpoint_dir).resolve()
+    checkpoints = workspace_path(root, checkpoint_dir)
     tables = sorted(p for p in source.iterdir() if p.is_dir() and not p.name.startswith((".", "_")))
     if not tables:
         raise FileNotFoundError(f"no table folders in {source_dir}")

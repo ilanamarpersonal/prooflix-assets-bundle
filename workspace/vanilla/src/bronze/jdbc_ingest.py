@@ -86,7 +86,8 @@ def _merge(df, ref, keys: list[str], watermark: str | None) -> dict:
         df = df.dropDuplicates(keys)
     view = f"jdbc_src_{uuid.uuid4().hex}"
     df.createOrReplaceTempView(view)
-    on = " AND ".join(f"t.`{k}` <=> s.`{k}`" for k in keys)  # <=>: null keys match too
+    q = lambda name: "`" + name.replace("`", "``") + "`"  # noqa: E731 - column names come from the database
+    on = " AND ".join(f"t.{q(k)} <=> s.{q(k)}" for k in keys)  # <=>: null keys match too
     spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")  # new columns are added
     try:
         res = spark.sql(
