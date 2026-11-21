@@ -1,14 +1,26 @@
 # E2E: end-to-end run of the data flow: bronze, then silver, then gold.
 # The file name (without .yaml) is the pipeline id: "e2e".
 name: E2E
-description: End-to-end run, runs the bronze, silver and gold pipelines in that order
+description: End-to-end run for one tenant, runs the bronze, silver and gold pipelines in that order
+
+# The tenant is chosen when the run starts (Run in the Pipelines tab asks for it).
+# Prooflix checks it is a short lowercase identifier before anything runs, and
+# every layer then reads and writes the catalog <tenant_id> (tenant1.gold....).
+parameters:
+  tenant_id:
+    type: identifier
+    default: tenant1
+    required: true
+    description: Tenant ID, like tenant1; the run reads and writes the catalog of that name
 
 tasks:
-  # Call bronze as a sub-pipeline (it uses its own default parameters).
+  # Call bronze as a sub-pipeline for the chosen tenant (its other parameters keep their defaults).
   - key: run_bronze
     type: pipeline
     description: Run the bronze pipeline
     pipeline: bronze
+    parameters:
+      tenant_id: ${params.tenant_id}
 
   # Then silver, which turns the long dates of the bronze tables into date-times.
   # depends_on makes it start only after run_bronze succeeded; if bronze fails,
@@ -17,6 +29,8 @@ tasks:
     type: pipeline
     description: Run the silver pipeline
     pipeline: silver
+    parameters:
+      tenant_id: ${params.tenant_id}
     depends_on: [run_bronze]
 
   # Then gold, which aggregates the silver tables, once silver succeeded.
@@ -24,9 +38,12 @@ tasks:
     type: pipeline
     description: Run the gold pipeline
     pipeline: gold
+    parameters:
+      tenant_id: ${params.tenant_id}
     depends_on: [run_silver]
 
 outputs:
+  tenant_id: ${params.tenant_id}
   bronze_rows: ${tasks.run_bronze.output.rows}
   silver_rows: ${tasks.run_silver.output.rows}
   gold_days: ${tasks.run_gold.output.days}

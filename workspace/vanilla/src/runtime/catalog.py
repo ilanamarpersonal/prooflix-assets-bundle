@@ -2,6 +2,7 @@
 
     from runtime.catalog import tenant_catalog
     cat = tenant_catalog(ctx)                 # tenant1 (PROOFLIX_UC_CATALOG)
+    cat = tenant_catalog(ctx, catalog="tenant2")  # another tenant (a run's tenant_id)
     ref = cat.table("bronze", "accounts")     # tenant1.bronze.accounts
     ref.name, ref.location                    # full name, folder of its Delta files
 
@@ -14,6 +15,7 @@ schemas a task asks for. Tables are external Delta tables whose files live under
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -22,6 +24,10 @@ from pathlib import Path
 from runtime import spark_session
 
 API = "/api/2.1/unity-catalog"
+# A tenant ID is a catalog name, a folder name and part of SQL names: only a short
+# lowercase identifier. Prooflix checks a typed tenant_id parameter before a run starts;
+# this checks again, for any other caller.
+TENANT_ID = re.compile(r"[a-z][a-z0-9_]{0,31}")
 
 
 @dataclass(frozen=True)
@@ -87,6 +93,9 @@ def drop_table_entry(ref: TableRef, ctx=None) -> bool:
 
 def tenant_catalog(ctx=None, schemas: tuple[str, ...] = (), catalog: str | None = None) -> TenantCatalog:
     """The tenant catalog, ready to use: created in Unity Catalog and Spark if needed, with `schemas`."""
+    if catalog is not None and not TENANT_ID.fullmatch(catalog):  # a run's tenant_id (the settings' is trusted)
+        raise ValueError(f"tenant '{catalog}' must be a short lowercase identifier (a letter, then a-z, 0-9 or _), "
+                         "like tenant1")
     spark = spark_session.get_spark(ctx)
     s = spark_session.settings(ctx)
     name = catalog or s.catalog

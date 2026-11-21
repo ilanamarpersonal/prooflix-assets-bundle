@@ -7,7 +7,7 @@ gold.agg_transactions_per_date:
     transaction_date   date    the day (UTC) of transaction_ts
     transaction_count  long    number of transactions that day
 
-The table is rebuilt from all of silver on every run, so it always matches silver.
+tenant_id picks the tenant catalog (tenant1 by default). The table is rebuilt from all of silver on every run, so it always matches silver.
 """
 
 from __future__ import annotations
@@ -23,10 +23,10 @@ TABLE = "agg_transactions_per_date"
 
 
 def transactions_per_date(source_table: str = "silver.transactions", timestamp_column: str = "transaction_ts",
-                          ctx=None) -> dict:
+                          tenant_id: str | None = None, ctx=None) -> dict:
     log = ctx.log if ctx is not None else print
     spark = get_spark(ctx)
-    catalog = tenant_catalog(ctx, schemas=("gold",))
+    catalog = tenant_catalog(ctx, schemas=("gold",), catalog=tenant_id)
     schema, table = source_table.split(".")[-2:]
     ref = catalog.table(schema, table)
     source = ref.name

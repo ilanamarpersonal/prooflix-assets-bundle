@@ -1,18 +1,22 @@
 # Bronze: lands every new source file as rows of a Delta table, with Spark.
 # The file name (without .yaml) is the pipeline id: "bronze".
 name: Bronze
-description: Streams new source files into Delta tables tenant1.bronze.<table> (Spark Structured Streaming, Unity Catalog)
+description: Streams new source files into Delta tables <tenant_id>.bronze.<table> (Spark Structured Streaming, Unity Catalog)
 
 # Layout:
 #   source/<table>/*.avro                        raw files (the workspace's source data
 #                                                folder, set in the Workspace tab)
-#   tenant1.bronze.<table>                       Delta table in Unity Catalog, files under
-#                                                data/tenant1/lakehouse/bronze/<table>
-#   data/tenant1/checkpoint/bronze/<table>/      Spark's streaming checkpoint: which files
+#   <tenant_id>.bronze.<table>                   Delta table in Unity Catalog, files under
+#                                                data/<tenant_id>/lakehouse/bronze/<table>
+#   data/<tenant_id>/checkpoint/bronze/<table>/  Spark's streaming checkpoint: which files
 #                                                were read (delete it to read all again)
 parameters:
+  tenant_id:                                      # typed: checked by Prooflix before the run starts
+    type: identifier                              # a short lowercase identifier, like tenant1
+    default: tenant1
+    required: true
+    description: Tenant whose catalog the run writes (<tenant_id>.bronze.<table>)
   source_dir: source                              # one sub-folder per table
-  checkpoint_dir: data/tenant1/checkpoint/bronze  # one streaming checkpoint per table
   file_format: avro
 
 tasks:
@@ -23,9 +27,11 @@ tasks:
     entrypoint: bronze.ingest:run
     parameters:
       source_dir: ${params.source_dir}
-      checkpoint_dir: ${params.checkpoint_dir}
+      tenant_id: ${params.tenant_id}
+      checkpoint_dir: data/${params.tenant_id}/checkpoint/bronze  # one streaming checkpoint per table
       file_format: ${params.file_format}
 
 outputs:
+  tenant_id: ${params.tenant_id}
   tables: ${tasks.ingest.output.tables}
   rows: ${tasks.ingest.output.rows}

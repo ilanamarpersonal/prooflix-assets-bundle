@@ -1,9 +1,14 @@
 # Gold: business aggregates built from the silver tables, with Spark.
 # The file name (without .yaml) is the pipeline id: "gold".
 name: Gold
-description: Counts transactions per day from tenant1.silver.transactions into tenant1.gold.agg_transactions_per_date
+description: Counts transactions per day from <tenant_id>.silver.transactions into <tenant_id>.gold.agg_transactions_per_date
 
 parameters:
+  tenant_id:                                      # typed: checked by Prooflix before the run starts
+    type: identifier                              # a short lowercase identifier, like tenant1
+    default: tenant1
+    required: true
+    description: Tenant whose catalog the run writes (<tenant_id>.gold.<table>)
   source_table: silver.transactions   # in the tenant catalog
   timestamp_column: transaction_ts
 
@@ -14,10 +19,12 @@ tasks:
     description: Count transactions per day (rebuilds the whole table)
     entrypoint: gold.aggregate:transactions_per_date
     parameters:
+      tenant_id: ${params.tenant_id}
       source_table: ${params.source_table}
       timestamp_column: ${params.timestamp_column}
 
 outputs:
+  tenant_id: ${params.tenant_id}
   days: ${tasks.agg_transactions_per_date.output.days}
   transactions: ${tasks.agg_transactions_per_date.output.transactions}
   first_date: ${tasks.agg_transactions_per_date.output.first_date}

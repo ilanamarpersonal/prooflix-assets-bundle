@@ -1,17 +1,21 @@
 # Silver: the bronze tables with their dates as date-times, plus dimension tables.
 # The file name (without .yaml) is the pipeline id: "silver".
 name: Silver
-description: Streams new bronze rows into tenant1.silver with long dates as date-times, and loads the CSV dimension seeds
+description: Streams new bronze rows into <tenant_id>.silver with long dates as date-times, and loads the CSV dimension seeds
 
 # Layout:
-#   tenant1.bronze.<table>                        read (new rows only)
-#   tenant1.silver.<table>                        written: date columns as timestamps (UTC)
-#   tenant1.silver.dim_<seed>                     written from seeds/<seed>.csv
-#   data/tenant1/checkpoint/silver/<table>/       Spark's streaming checkpoint
+#   <tenant_id>.bronze.<table>                    read (new rows only)
+#   <tenant_id>.silver.<table>                    written: date columns as timestamps (UTC)
+#   <tenant_id>.silver.dim_<seed>                 written from seeds/<seed>.csv
+#   data/<tenant_id>/checkpoint/silver/<table>/   Spark's streaming checkpoint
 parameters:
+  tenant_id:                                      # typed: checked by Prooflix before the run starts
+    type: identifier                              # a short lowercase identifier, like tenant1
+    default: tenant1
+    required: true
+    description: Tenant whose catalog the run writes (<tenant_id>.silver.<table>)
   tables: [customers, accounts, transactions]
   datetime_columns: [date_of_birth, joined_date, opened_date, transaction_ts]  # long ms -> timestamp (UTC)
-  checkpoint_dir: data/tenant1/checkpoint/silver
   seeds_dir: seeds
 
 tasks:
@@ -23,10 +27,12 @@ tasks:
     parameters:
       tables: ${params.tables}
       datetime_columns: ${params.datetime_columns}
-      checkpoint_dir: ${params.checkpoint_dir}
+      tenant_id: ${params.tenant_id}
+      checkpoint_dir: data/${params.tenant_id}/checkpoint/silver
       seeds_dir: ${params.seeds_dir}
 
 outputs:
+  tenant_id: ${params.tenant_id}
   tables: ${tasks.conform.output.tables}
   rows: ${tasks.conform.output.rows}
   dimensions: ${tasks.conform.output.dimensions}

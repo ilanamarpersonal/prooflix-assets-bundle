@@ -1,7 +1,8 @@
 """Bronze: lands new source files as Delta tables, with Spark Structured Streaming.
 
 Called by the `bronze` pipeline (entrypoint bronze.ingest:run). Each folder of the
-source data is a table: source/accounts/*.avro -> tenant1.bronze.accounts. One
+source data is a table: source/accounts/*.avro -> <tenant_id>.bronze.accounts
+(tenant_id: the run's tenant, tenant1 by default). One
 stream per table reads the files it has not seen yet and appends their rows, as
 they are, plus:
 
@@ -27,7 +28,8 @@ from runtime.spark_session import get_spark
 SCHEMA = "bronze"
 
 
-def run(source_dir: str, checkpoint_dir: str, file_format: str = "avro", ctx=None) -> dict:
+def run(source_dir: str, checkpoint_dir: str, file_format: str = "avro", tenant_id: str | None = None,
+        ctx=None) -> dict:
     root = ctx.workspace if ctx is not None else Path.cwd()
     log = ctx.log if ctx is not None else print
     source = workspace_path(root, source_dir)
@@ -39,7 +41,7 @@ def run(source_dir: str, checkpoint_dir: str, file_format: str = "avro", ctx=Non
         raise FileNotFoundError(f"no table folders in {source_dir}")
 
     spark = get_spark(ctx)
-    catalog = tenant_catalog(ctx, schemas=(SCHEMA,))
+    catalog = tenant_catalog(ctx, schemas=(SCHEMA,), catalog=tenant_id)
     start = getattr(ctx, "start_date", None)
     out = {}
     for folder in tables:

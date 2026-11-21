@@ -75,6 +75,15 @@ e2e
 The order is bronze, silver, gold: each starts only after the one before succeeded,
 and if one fails the rest are skipped.
 
+**Tenant.** `e2e`, `bronze`, `silver` and `gold` take a `tenant_id` parameter
+(default `tenant1`): Run in the Pipelines tab asks for it, and the run reads and
+writes the catalog of that name (`acme.gold.agg_transactions_per_date`), with its
+files and checkpoints under `data/<tenant_id>/`. It is declared as
+`type: identifier`, so Prooflix accepts only a short lowercase identifier (a
+letter, then `a-z`, `0-9` or `_`, at most 32 characters) before anything runs, and
+`runtime/catalog.py` checks it again. Every tenant reads the same `source/` files.
+Below, `tenant1` stands for the run's tenant.
+
 ## Bronze
 
 Each folder of `source/` is a table: `source/accounts/*.avro` ->

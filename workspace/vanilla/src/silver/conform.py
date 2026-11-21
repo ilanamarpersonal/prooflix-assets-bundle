@@ -9,7 +9,7 @@ date-time (timestamp, UTC):
     transaction_ts                            long ms -> date-time, to the millisecond
 
 The CSV seeds (seeds/*.csv) are loaded as dimension tables silver.dim_<name> on
-every run.
+every run. tenant_id picks the tenant catalog (tenant1 by default).
 """
 
 from __future__ import annotations
@@ -28,11 +28,11 @@ SOURCE, TARGET = "bronze", "silver"
 
 
 def run(tables: list[str], datetime_columns: list[str], checkpoint_dir: str, seeds_dir: str = "seeds",
-        ctx=None) -> dict:
+        tenant_id: str | None = None, ctx=None) -> dict:
     root = ctx.workspace if ctx is not None else Path.cwd()
     log = ctx.log if ctx is not None else print
     spark = get_spark(ctx)
-    catalog = tenant_catalog(ctx, schemas=(TARGET,))
+    catalog = tenant_catalog(ctx, schemas=(TARGET,), catalog=tenant_id)
     checkpoints = workspace_path(root, checkpoint_dir)
 
     out = {}
