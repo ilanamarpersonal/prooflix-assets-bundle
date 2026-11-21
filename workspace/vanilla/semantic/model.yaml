@@ -1,0 +1,81 @@
+# Semantic model: business meaning on top of the catalog's tables.
+# Edit it in Prooflix's Semantic tab: the YAML tab saves your text as written; the
+# Model tab rewrites the file (comments other than these are not kept).
+name: Banking
+description: Customers, their accounts and transactions (silver layer).
+entities:
+- name: transactions
+  table: tenant1.silver.transactions
+  description: Every money movement on an account.
+  primary_key: transaction_id
+  dimensions:
+  - name: day
+    sql: CAST(transactions.transaction_ts AS DATE)
+    type: time
+    description: UTC day of the transaction
+  - name: month
+    sql: DATE_TRUNC('month', transactions.transaction_ts)
+    type: time
+  - name: type
+    column: type
+  measures:
+  - name: count
+    agg: count
+    description: Number of transactions
+  - name: total_amount
+    column: amount
+  - name: average_amount
+    agg: avg
+    column: amount
+  joins:
+  - entity: accounts
+    column: account_id
+    to_column: account_id
+  - entity: transaction_types
+    column: type
+    to_column: type
+- name: accounts
+  table: tenant1.silver.accounts
+  primary_key: account_id
+  dimensions:
+  - name: account_type
+    column: account_type
+  - name: currency
+    column: currency
+  - name: status
+    column: status
+  measures:
+  - name: count
+    agg: count
+  - name: total_balance
+    column: balance
+  joins:
+  - entity: customers
+    column: customer_id
+    to_column: customer_id
+- name: customers
+  table: tenant1.silver.customers
+  primary_key: customer_id
+  dimensions:
+  - name: country
+    column: country
+  - name: city
+    column: city
+  - name: segment
+    column: segment
+  measures:
+  - name: count
+    agg: count_distinct
+    column: customer_id
+- name: transaction_types
+  table: tenant1.silver.dim_transaction_types
+  primary_key: type
+  dimensions:
+  - name: direction
+    column: direction
+  - name: description
+    column: description
+metrics:
+- name: average_balance
+  sql: '{accounts.total_balance} / NULLIF({accounts.count}, 0)'
+  description: Average balance per account
