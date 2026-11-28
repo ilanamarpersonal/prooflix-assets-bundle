@@ -34,7 +34,7 @@ PACKAGES = (
     "io.delta:delta-spark_4.0_2.13:4.3.1",
     "io.unitycatalog:unitycatalog-spark_4.0_2.13:0.7.0",
     f"org.apache.spark:spark-avro_2.13:{SPARK_VERSION}",
-    # JDBC drivers for ingesting relational databases (bronze/jdbc_ingest.py)
+    # JDBC drivers for ingesting relational databases (the platform task prooflix.tasks.jdbc_ingest)
     "com.oracle.database.jdbc:ojdbc11:23.5.0.24.07",
     "com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11",
     "com.mysql:mysql-connector-j:9.1.0",

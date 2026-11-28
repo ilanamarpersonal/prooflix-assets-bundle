@@ -6,7 +6,7 @@ parameters: {from_date: null, to_date: null}
 tasks:
 - key: ingest
   type: python
-  entrypoint: bronze.jdbc_ingest:run
+  entrypoint: prooflix.tasks.jdbc_ingest:run
   parameters:
     connection: banktest
     start_date: '1971-01-10'
